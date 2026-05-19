@@ -1,0 +1,44 @@
+.container {
+  overflow-x: auto;
+  padding-bottom: 4px;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  table,
+  td,
+  th {
+    text-align: left;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    padding: 8px;
+    line-height: 16px;
+  }
+
+  th {
+    color: var(--title-color);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    padding-right: 24px;
+    border: 1px solid var(--border-radius);
+  }
+
+  td {
+    color: #232e44;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  td {
+    border: 1px solid var(--border-radius);
+  }
+}

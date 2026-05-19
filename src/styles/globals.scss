@@ -1,0 +1,229 @@
+@use "color";
+@use "variables";
+@use "font";
+@use "grid";
+@use "anim";
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: SF-Pro, sans-serif;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+input,
+select,
+textarea {
+  background-color: transparent;
+  outline: none;
+}
+button {
+  cursor: pointer;
+  background-color: transparent;
+  outline: none;
+  border: 0;
+}
+body {
+  top: 0 !important;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-user-drag: none;
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+}
+a {
+  text-decoration: none;
+  color: #000;
+}
+
+input[type="radio"] {
+  position: relative;
+  height: 18px;
+  width: 18px;
+  &::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 32px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #cccccc;
+  }
+}
+
+input[type="radio"]:checked {
+  &::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 32px;
+    background: linear-gradient(180deg, #01d32b 0%, rgb(0, 163, 27) 100%);
+    border: 1px solid #01d32b;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: 10;
+    left: 6px;
+    top: 4px;
+    width: 6px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+}
+.slick-dots {
+  bottom: 8px !important;
+}
+.slick-dots.slick-thumb {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.slick-dots.slick-thumb li {
+  width: 8px;
+  height: 8px;
+  margin: 0 3px;
+  border-radius: 32px;
+  transition: all 0.5s ease-in-out;
+  will-change: width;
+  background-color: var(--primary);
+  opacity: 0.2;
+}
+
+.slick-dots.slick-thumb li.slick-active {
+  background-color: var(--primary);
+  opacity: 1;
+  width: 24px;
+}
+
+.rfm-marquee-container {
+  overflow: initial !important;
+}
+
+.toastify-custom {
+  color: var(--light);
+  text-align: center;
+  padding: 6px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 6px !important;
+  min-height: max-content;
+  display: grid;
+  .Toastify__toast-body {
+    .Toastify__toast-icon {
+      font-size: 18px;
+      width: max-content;
+      margin-right: 6px;
+    }
+    padding: 12px;
+    line-height: 24px;
+    font-size: 14px;
+  }
+}
+
+.toastify-custom-success {
+  color: #51cc57;
+  text-align: center;
+  padding: 0px;
+  line-height: 12px;
+  background-color: #103325;
+  border-radius: 4px;
+}
+
+.toastify-custom-info {
+  color: #5099f8;
+  text-align: center;
+  padding: 0px;
+  line-height: 12px;
+  background-color: #101433;
+  border-radius: 4px;
+}
+
+.toastify-custom-error {
+  color: #f85050;
+  text-align: center;
+  padding: 0px;
+  line-height: 12px;
+  background-color: #331010;
+  border-radius: 4px;
+}
+
+.toastify-custom-warn {
+  color: #ff8800;
+  text-align: center;
+  padding: 0px;
+  line-height: 12px;
+  background-color: #332210;
+  border-radius: 4px;
+}
+
+#walktour-portal {
+  border: none !important;
+  * {
+    border: none !important;
+
+    &:focus {
+      border: none !important;
+    }
+
+    &:active {
+      border: none !important;
+    }
+  }
+
+  rect {
+    fill-opacity: 0.6 !important;
+  }
+}
+
+.skiptranslate > iframe {
+  display: none !important;
+  height: 0;
+  top: 0;
+}
+
+#google_translate_element {
+  // display: none;
+}
+
+#goog-gt-tt,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf {
+  display: none !important;
+}
+
+.th {
+  white-space: nowrap;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 4px;
+}

@@ -1,0 +1,115 @@
+.container {
+  overflow: auto;
+  white-space: nowrap;
+  padding: 7px 0;
+
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &.outline {
+    overflow: auto;
+    padding-bottom: 4px;
+    z-index: 1;
+    border-bottom: 1px solid var(--light-grey);
+    padding-bottom: 0;
+    margin-bottom: 24px;
+
+    .item {
+      font-size: 14px;
+      padding: 12px 8px;
+      border: none;
+      background-color: transparent;
+
+      &.active {
+        color: var(--dark);
+        border-bottom: 3px solid var(--primary);
+        border-radius: 0px;
+        background: transparent;
+      }
+    }
+  }
+}
+
+.item {
+  position: relative;
+  min-width: 60px;
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  text-align: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: 1px solid var(--active-menu);
+  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  & + .item {
+    margin-left: 8px;
+  }
+
+  &.active {
+    color: var(--light);
+    border: none;
+    border: 1px solid #e07b2e;
+    background: linear-gradient(180deg, #ffa665 0%, #e36100 100%);
+  }
+
+  &.item_border {
+    border-bottom: 2px solid transparent;
+    color: var(--text-color);
+
+    &.active {
+      background: none;
+      color: var(--primary);
+      border-radius: 0px;
+      border-bottom: 2px solid var(--primary);
+    }
+  }
+}
+
+.count {
+  font-weight: 500;
+  font-size: 9px;
+  line-height: 11px;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  background-color: var(--danger);
+  color: var(--light);
+  display: block;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 764px) {
+  .container {
+    .item {
+      font-size: 12px;
+      font-weight: 400;
+      min-width: max-content;
+      padding: 4px 8px;
+
+      &.item_border {
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+@media (min-width: 764px) and (max-width: 1048px) {
+  .item {
+    font-size: 14px;
+  }
+}

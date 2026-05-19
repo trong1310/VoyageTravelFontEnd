@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "create component",
+      "command": "mkdir -p 'src/components/${input:type}/${input:dirName}/interfaces' && touch 'src/components/${input:type}/${input:dirName}/interfaces/index.ts' 'src/components/${input:type}/${input:dirName}/${input:dirName}.tsx' 'src/components/${input:type}/${input:dirName}/${input:dirName}.module.scss' 'src/components/${input:type}/${input:dirName}/index.ts' && echo 'export interface Props${input:dirName} {}' >> 'src/components/${input:type}/${input:dirName}/interfaces/index.ts' && echo 'export { default } from \"./${input:dirName}\";' >> 'src/components/${input:type}/${input:dirName}/index.ts' && echo 'import styles from \"./${input:dirName}.module.scss\"; \nimport {Props${input:dirName}} from \"./interfaces\";\nimport { memo } from \"react\";  \n\nfunction ${input:dirName}({}:Props${input:dirName}) { \n\treturn <div>${input:dirName}</div>; \n} \n\nexport default memo(${input:dirName});' >> 'src/components/${input:type}/${input:dirName}/${input:dirName}.tsx'",
+      "type": "shell",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "type",
+      "description": "Where do you want to create?",
+      "default": "page/"
+    },
+    {
+      "type": "promptString",
+      "id": "dirName",
+      "description": "Complete my folder name",
+      "default": "tsx folder to create"
+    }
+  ]
+}

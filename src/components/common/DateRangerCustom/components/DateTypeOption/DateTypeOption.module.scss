@@ -1,0 +1,40 @@
+// mainOption
+.mainOption {
+  margin-top: 8px;
+  width: 160px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--background-color);
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.option {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 10px;
+  transition: 0.3s;
+
+  &:hove {
+    color: var(--primary);
+  }
+
+  & + & {
+    margin-top: 4px;
+  }
+
+  &.option_active {
+    color: var(--primary);
+  }
+}
+
+.icon_check {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

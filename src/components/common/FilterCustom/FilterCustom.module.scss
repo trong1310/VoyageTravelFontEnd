@@ -1,0 +1,128 @@
+@import "../../../styles/variables";
+
+.dealer {
+  height: 40px;
+  padding: 8px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  user-select: none;
+  border-radius: 8px;
+  background-color: var(--background-color);
+  cursor: pointer;
+  transition: 0.3s;
+  border: 1px solid var(--border-radius);
+
+  .value {
+    display: flex;
+    align-items: center;
+  }
+
+  .name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--title-color);
+  }
+
+  .text {
+    flex: 1;
+    color: var(--title-color);
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 8px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    -webkit-line-clamp: 1;
+  }
+
+  &:hover {
+    border: 1px solid var(--primary);
+  }
+
+  &.active {
+    border: 1px solid var(--primary);
+
+    .icon_arrow {
+      transform: rotate(-180deg);
+    }
+  }
+}
+
+.icon_arrow {
+  margin-left: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.mainOption {
+  margin-top: 1px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--background-color);
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.option {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 11px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 10px;
+  transition: 0.3s;
+  color: var(--title-color);
+
+  &:hove {
+    color: var(--primary);
+  }
+
+  & + & {
+    margin-top: 4px;
+  }
+
+  &.option_active {
+    color: var(--primary);
+  }
+}
+
+.icon_check {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.list {
+  max-height: 400px;
+  overflow: auto;
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .img {
+    width: 30px;
+
+    .icon {
+      padding-top: 60%;
+    }
+  }
+}
+
+@media (max-width: $widthTablet) {
+  .dealer {
+    flex: 1;
+  }
+}

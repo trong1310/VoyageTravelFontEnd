@@ -1,0 +1,8 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin-bottom: 18px;
+  h1 {
+    font-size: 26px;
+  }
+}

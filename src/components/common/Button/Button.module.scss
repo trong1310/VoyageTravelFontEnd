@@ -1,0 +1,301 @@
+.container {
+  outline: none;
+  border: none;
+  width: 100%;
+  background: transparent;
+  user-select: none;
+}
+
+.onClick {
+  .btn {
+    padding: 13px 24px;
+  }
+}
+
+.btn {
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--light);
+  outline: none;
+  border: none;
+  padding: 12px 24px;
+  transition: 0.2s;
+  font-size: 14px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  gap: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  &.notUseEffect {
+    transition: 0s;
+  }
+
+  &.disable {
+    cursor: no-drop !important;
+    opacity: 0.3 !important;
+    pointer-events: none;
+
+    &:active {
+      transform: scale(1) !important;
+    }
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.btn.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  position: relative;
+}
+
+.text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.small {
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.small_p_6 {
+  padding: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.maxContent {
+  max-width: max-content;
+}
+
+.maxHeight {
+  height: 100%;
+}
+
+.primary {
+  background: var(--primary);
+  color: var(--light);
+}
+
+.primaryLight {
+  color: var(--light);
+  background: linear-gradient(
+    287deg,
+    #ff7209 -19.12%,
+    #ff7209 51.84%,
+    #ff9342 51.85%,
+    #ff7209 102.06%
+  );
+}
+
+.btnActionAllow {
+  border-radius: 6px;
+  background: #ecffed;
+  padding: 4px 8px;
+  color: var(--green);
+
+  &:hover {
+    background: var(--green);
+    color: var(--light) !important;
+  }
+}
+
+.btnActionCancel {
+  border-radius: 6px;
+  background: #fff3f3;
+  padding: 4px 8px;
+  color: var(--danger);
+
+  &:hover {
+    background: var(--danger);
+    color: var(--light) !important;
+  }
+}
+
+.primary_outline {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.danger {
+  background: var(--danger);
+  color: var(--light);
+}
+
+.grey {
+  background: var(--border);
+  border: 1px solid var(--border);
+  color: var(--dark);
+}
+
+.dark {
+  background: var(--dark);
+  border: 1px solid var(--dark);
+  color: var(--light);
+}
+
+.grey_outline {
+  border: 1px solid var(--grey);
+  color: var(--light);
+}
+
+.light_outline {
+  background: transparent;
+  border: 1px solid var(--light);
+  color: var(--light);
+}
+
+.gradient_pink_blue {
+  background: var(--gradient-pink-blue);
+  color: var(--light);
+}
+
+.gradient_light {
+  background: var(--gradient-light);
+  color: var(--dark);
+}
+
+.gradient_green {
+  background: var(--gradient-green);
+  color: var(--light);
+}
+
+.green {
+  background: var(--green);
+  border: 1px solid var(--green);
+  color: var(--light);
+}
+
+.blue {
+  background: #0055aa;
+  border: 1px solid #0055aa;
+  color: var(--light);
+}
+
+.green_outline {
+  background: var(--light);
+  border: 1px solid var(--green);
+  color: var(--green);
+  &:hover {
+    background: var(--green);
+    color: var(--light);
+  }
+}
+
+.danger_outline {
+  background: var(--light);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  &:hover {
+    background: var(--danger);
+    color: var(--light);
+  }
+}
+
+//**********************
+//* CUSTOM STYLE
+//**********************
+.bold {
+  font-weight: 600;
+}
+
+.bold_lest {
+  font-weight: 500;
+}
+
+.rounded_32 {
+  border-radius: 32px;
+}
+
+.rounded_20 {
+  border-radius: 20px;
+}
+
+.rounded_12 {
+  border-radius: 12px;
+}
+
+.rounded_8 {
+  border-radius: 8px;
+}
+
+.rounded_6 {
+  border-radius: 6px;
+}
+
+.rounded_4 {
+  border-radius: 4px;
+}
+
+.px_0 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.p_2_9 {
+  padding: 2px 9px;
+}
+
+.p_4_12 {
+  padding: 4px 12px;
+}
+.p_6_12 {
+  padding: 6px 12px;
+}
+.p_8_24 {
+  padding: 8px 24px;
+}
+
+.p_8_40 {
+  padding: 8px 40px;
+}
+
+.p_10_14 {
+  padding: 10px 14px;
+}
+
+.p_10_24 {
+  padding: 10px 24px;
+}
+
+.p_4_8 {
+  padding: 4px 8px;
+}
+
+.w_fit {
+  width: fit-content;
+}
+
+.fz13 {
+  font-size: 13px;
+}
+
+.textLight {
+  color: var(--text-color);
+}

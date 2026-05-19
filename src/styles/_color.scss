@@ -1,0 +1,28 @@
+.global {
+  --primary: #08a4ff;
+  --light-primary:  rgb(8, 164, 255, 0.1);
+  --light-primary-gradient: linear-gradient(180deg, #9d7f4c 0%, rgba(37, 37, 37, 0) 100%);
+  --blue: rgba(49, 106, 216, 1);
+  --purple: rgba(203, 54, 255, 1);
+  --dark-purple: rgba(142, 89, 255, 1);
+  --light-purple: rgba(203, 54, 255, 0.1);
+  --warning: #FFBF39;
+  --light-warning: rgba(251, 165, 0, 0.1);
+  --danger: #F35353;
+  --light-danger: rgba(242, 77, 77, 0.1);
+  --green: #00ac00;
+  --light-green: rgba(11, 204, 111, 0.1);
+  --light: #ffffff;
+  --dark: #141414;
+  --grey: #696969;
+  --light-grey: #f1f1f1;
+  --border: #E4E6EC;
+}
+
+.admin-theme {
+  --primary: #E9680C;
+  --light-primary: rgba(233, 104, 12, 0.1);
+  --primary-hover: #d55e0a;
+}
+
+

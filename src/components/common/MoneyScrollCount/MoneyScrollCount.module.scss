@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+  // align-items: center;
+  height: 22px;
+  overflow: hidden;
+}
+
+.col {
+  display: inline-block;
+  transform: translate(0, 22px);
+  transition: 0.25s linear;
+}
+
+.item {
+  height: 22px;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,0 +1,16 @@
+.container {
+  &.maxContent {
+    min-height: max-content;
+
+    .loading {
+      min-height: max-content;
+    }
+  }
+}
+
+.loading {
+  min-height: 25dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
