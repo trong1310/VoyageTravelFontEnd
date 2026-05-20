@@ -119,6 +119,25 @@ export const carService = {
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Cars/detail/${slug}`
     );
   },
+  getClientCarDetail: async (slug: string): Promise<any> => {
+    return axiosClient.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientCars/detail/${slug}`
+    );
+  },
+  bookCar: async (payload: {
+    slug: string;
+    startTime: string;
+    totalCustomer: number;
+    fullName: string;
+    phoneNumber: string;
+    email: string;
+    specialRequirements: string;
+  }): Promise<any> => {
+    return axiosClient.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientCars/booking`,
+      payload
+    );
+  },
   updateCar: async (payload: CarUpdateRequest): Promise<any> => {
     return axiosClient.post(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Cars/update`,

@@ -2,13 +2,11 @@ import React, { useState, useEffect, useCallback, memo } from "react";
 import styles from "./MainIndex.module.scss";
 import { PropsMainIndex } from "./interfaces";
 import {
-  FiSearch, FiCompass, FiTruck, FiMapPin, FiStar,
-  FiClock, FiPhone, FiMail, FiSend, FiEye, FiUser, FiCalendar
+  FiSearch, FiMapPin, FiStar, FiClock, FiCompass
 } from "react-icons/fi";
 import Link from "next/link";
-import { tourService, TourItem } from "~/services/tourService";
-import { carService, CarItem } from "~/services/carService";
-import { toast } from "react-toastify";
+import { tourService } from "~/services/tourService";
+import { carService } from "~/services/carService";
 
 const getImageUrl = (path: string) => {
   if (!path) return "";
@@ -21,10 +19,6 @@ const getImageUrl = (path: string) => {
 };
 
 function MainIndex({ }: PropsMainIndex) {
-  // Navigation active tab
-  const [activeTab, setActiveTab] = useState("home");
-  const [isScrolled, setIsScrolled] = useState(false);
-
   // Data states
   const [tours, setTours] = useState<any[]>([]);
   const [cars, setCars] = useState<any[]>([]);
@@ -37,31 +31,6 @@ function MainIndex({ }: PropsMainIndex) {
   const [isLoadingTours, setIsLoadingTours] = useState(false);
   const [isLoadingCars, setIsLoadingCars] = useState(false);
 
-  // Detailed modal states
-  const [selectedTour, setSelectedTour] = useState<any>(null);
-  const [isTourModalOpen, setIsTourModalOpen] = useState(false);
-  const [isLoadingTourDetail, setIsLoadingTourDetail] = useState(false);
-
-  // Contact form state
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactMsg, setContactMsg] = useState("");
-  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
-
-  // Monitor scroll for styling header
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   // Fetch client home page data
   const fetchData = useCallback(async () => {
     setIsLoadingTours(true);
@@ -70,7 +39,7 @@ function MainIndex({ }: PropsMainIndex) {
       // 1. Fetch Tours
       const tourRes = await tourService.getClientTours({
         limit: 6,
-        page: 0,
+        page: 1,
         isHot: 1,
         ranking: null,
       });
@@ -109,112 +78,12 @@ function MainIndex({ }: PropsMainIndex) {
   // Handle Search submit
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchData();
-    // Scroll to tours section if searched
-    const toursSection = document.getElementById("tours");
-    if (toursSection) {
-      toursSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  // View Tour detail modal
-  const handleViewTour = async (slug: string) => {
-    setIsTourModalOpen(true);
-    setIsLoadingTourDetail(true);
-    setSelectedTour(null);
-    try {
-      const res = await tourService.getTourDetail(slug);
-      if (res && res.error && res.error.code === 0 && res.data) {
-        setSelectedTour(res.data);
-      } else {
-        toast.error("Không thể tải thông tin chi tiết tour!");
-        setIsTourModalOpen(false);
-      }
-    } catch (err) {
-      console.error("Error fetching tour detail:", err);
-      toast.error("Lỗi khi tải thông tin tour!");
-      setIsTourModalOpen(false);
-    } finally {
-      setIsLoadingTourDetail(false);
-    }
-  };
-
-  // Handle Contact Submit
-  const handleContactSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!contactName.trim() || !contactPhone.trim()) {
-      return toast.warn("Vui lòng nhập tên và số điện thoại liên hệ!");
-    }
-    setIsSubmittingContact(true);
-    setTimeout(() => {
-      toast.success("Gửi yêu cầu liên hệ thành công! VOYAGE Travel sẽ sớm phản hồi.");
-      setContactName("");
-      setContactPhone("");
-      setContactEmail("");
-      setContactMsg("");
-      setIsSubmittingContact(false);
-    }, 1200);
-  };
-
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault();
-    setActiveTab(id);
-    const target = document.getElementById(id);
-    if (target) {
-      window.scrollTo({
-        top: target.offsetTop - 80,
-        behavior: "smooth",
-      });
-    }
+    // Navigate to tours page with search query
+    window.location.href = `/tours?search=${encodeURIComponent(searchKeyword)}`;
   };
 
   return (
     <div className={styles.mainContainer} id="home">
-      {/* Header */}
-      <header className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
-        <div className={styles.headerInner}>
-          <a href="#home" className={styles.logo} onClick={(e) => handleSmoothScroll(e, "home")}>
-            <span className={styles.logoOrange}>VOYAGE</span>
-            <span className={styles.logoDark}>Travel</span>
-          </a>
-
-          <nav className={styles.nav}>
-            <a
-              href="#home"
-              className={`${styles.navLink} ${activeTab === "home" ? styles.active : ""}`}
-              onClick={(e) => handleSmoothScroll(e, "home")}
-            >
-              Trang chủ
-            </a>
-            <a
-              href="#tours"
-              className={`${styles.navLink} ${activeTab === "tours" ? styles.active : ""}`}
-              onClick={(e) => handleSmoothScroll(e, "tours")}
-            >
-              Tour du lịch
-            </a>
-            <a
-              href="#cars"
-              className={`${styles.navLink} ${activeTab === "cars" ? styles.active : ""}`}
-              onClick={(e) => handleSmoothScroll(e, "cars")}
-            >
-              Xe du lịch
-            </a>
-            <a
-              href="#contact"
-              className={`${styles.navLink} ${activeTab === "contact" ? styles.active : ""}`}
-              onClick={(e) => handleSmoothScroll(e, "contact")}
-            >
-              Liên hệ
-            </a>
-          </nav>
-
-          <Link href="/admin/login" className={styles.adminBtn}>
-            Quản trị VOYAGE
-          </Link>
-        </div>
-      </header>
-
       {/* Hero Banner */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
@@ -264,13 +133,15 @@ function MainIndex({ }: PropsMainIndex) {
             {tours.map((t) => (
               <div key={t.slug} className={styles.tourCard}>
                 <div className={styles.tourImageWrapper}>
-                  <img
-                    src={getImageUrl(t.thumbnail)}
-                    alt={t.title}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80";
-                    }}
-                  />
+                  <Link href={`/tours/${t.slug}`}>
+                    <img
+                      src={getImageUrl(t.thumbnail)}
+                      alt={t.title}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80";
+                      }}
+                    />
+                  </Link>
                   {t.isHot === 1 && <span className={styles.hotTag}>Hot 🔥</span>}
                   <span className={styles.ratingTag}>
                     <FiStar /> {t.ranking || "5.0"}
@@ -287,7 +158,11 @@ function MainIndex({ }: PropsMainIndex) {
                     </span>
                   </div>
 
-                  <h3 className={styles.tourTitle}>{t.title}</h3>
+                  <h3 className={styles.tourTitle}>
+                    <Link href={`/tours/${t.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
+                      {t.title}
+                    </Link>
+                  </h3>
 
                   <div className={styles.tourFooter}>
                     <div className={styles.priceBox}>
@@ -301,9 +176,9 @@ function MainIndex({ }: PropsMainIndex) {
                       </span>
                     </div>
 
-                    <button onClick={() => handleViewTour(t.slug)} className={styles.detailBtn}>
+                    <Link href={`/tours/${t.slug}`} className={styles.detailBtn}>
                       Xem chi tiết
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -335,19 +210,25 @@ function MainIndex({ }: PropsMainIndex) {
             {cars.map((c) => (
               <div key={c.slug} className={styles.carCard}>
                 <div className={styles.carImageWrapper}>
-                  <img
-                    src={getImageUrl(c.thumbnail || c.thumbNail || "") || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=400&q=80"}
-                    alt={c.name}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=400&q=80";
-                    }}
-                  />
+                  <Link href={`/cars/${c.slug}`}>
+                    <img
+                      src={getImageUrl(c.thumbnail || c.thumbNail || "") || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=400&q=80"}
+                      alt={c.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=400&q=80";
+                      }}
+                    />
+                  </Link>
                   <span className={styles.seatsTag}>{c.seatCount} chỗ ngồi</span>
                 </div>
 
                 <div className={styles.carContent}>
                   <div className={styles.carTitleGroup}>
-                    <h3 className={styles.carTitle}>{c.name}</h3>
+                    <h3 className={styles.carTitle}>
+                      <Link href={`/cars/${c.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
+                        {c.name}
+                      </Link>
+                    </h3>
                     <span className={styles.licensePlate}>{c.licensePlate}</span>
                   </div>
 
@@ -370,16 +251,14 @@ function MainIndex({ }: PropsMainIndex) {
                     </div>
                   )}
 
-                  <a
-                    href="#contact"
-                    className={styles.contactBtn}
-                    onClick={(e) => {
-                      handleSmoothScroll(e, "contact");
-                      setContactMsg(`Tôi muốn liên hệ thuê xe dịch vụ: ${c.name} - BKS: ${c.licensePlate}`);
-                    }}
-                  >
-                    Liên hệ đặt xe ngay
-                  </a>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
+                    <Link href={`/cars/${c.slug}`} className={styles.detailBtn} style={{ flex: 1, textAlign: 'center' }}>
+                      Chi tiết
+                    </Link>
+                    <Link href={`/cars/${c.slug}`} className={styles.contactBtn} style={{ flex: 1, margin: 0, padding: '8px 12px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      Đặt xe ngay
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
@@ -402,7 +281,7 @@ function MainIndex({ }: PropsMainIndex) {
             // Fallback display destinations
             <>
               <div className={styles.destCard}>
-                <img src="https://images.unsplash.com/photo-1598890790688-842426307a50?auto=format&fit=crop&w=300&h=300&q=80" alt="Hà Long" />
+                <img src="https://images.unsplash.com/photo-1598890790688-842426307a50?auto=format&fit=crop&w=300&h=300&q=80" alt="Hạ Long" />
                 <div className={styles.destOverlay}>
                   <span className={styles.destName}>Vịnh Hạ Long</span>
                   <span className={styles.destToursCount}>Khám phá Kỳ quan</span>
@@ -454,181 +333,6 @@ function MainIndex({ }: PropsMainIndex) {
           )}
         </div>
       </section>
-
-      {/* Footer and Contact */}
-      <footer className={styles.footerSection} id="contact">
-        <div className={styles.footerInner}>
-          <div className={styles.footerCol}>
-            <a href="#home" className={styles.logo} onClick={(e) => handleSmoothScroll(e, "home")} style={{ marginBottom: '10px' }}>
-              <span className={styles.logoOrange}>VOYAGE</span>
-              <span className={styles.logoDark} style={{ color: '#ffffff' }}>Travel</span>
-            </a>
-            <p>
-              VOYAGE Travel tự hào là người đồng hành đáng tin cậy trên vạn dặm hành trình của bạn. Cung cấp dịch vụ lữ hành trọn gói chất lượng cao và xe dịch vụ êm ái hàng đầu.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', marginTop: '10px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiPhone /> Hotline: 1900 8198</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiMail /> Email: info@vtstravel.com</span>
-            </div>
-          </div>
-
-          <div className={styles.footerCol}>
-            <h4>Liên kết nhanh</h4>
-            <ul className={styles.footerLinks}>
-              <li><a href="#home" onClick={(e) => handleSmoothScroll(e, "home")}>Trang chủ</a></li>
-              <li><a href="#tours" onClick={(e) => handleSmoothScroll(e, "tours")}>Tour du lịch</a></li>
-              <li><a href="#cars" onClick={(e) => handleSmoothScroll(e, "cars")}>Đội xe du lịch</a></li>
-              <li><a href="#contact" onClick={(e) => handleSmoothScroll(e, "contact")}>Liên hệ với chúng tôi</a></li>
-            </ul>
-          </div>
-
-          <div className={styles.footerCol}>
-            <h4>Dịch vụ của chúng tôi</h4>
-            <ul className={styles.footerLinks}>
-              <li><a href="#tours" onClick={(e) => handleSmoothScroll(e, "tours")}>Tours nghỉ dưỡng</a></li>
-              <li><a href="#tours" onClick={(e) => handleSmoothScroll(e, "tours")}>Combo tiết kiệm</a></li>
-              <li><a href="#cars" onClick={(e) => handleSmoothScroll(e, "cars")}>Thuê xe lữ hành</a></li>
-              <li><a href="#contact" onClick={(e) => handleSmoothScroll(e, "contact")}>Hỗ trợ 24/7</a></li>
-            </ul>
-          </div>
-
-          <div className={styles.footerCol}>
-            <h4>Gửi yêu cầu tư vấn</h4>
-            <form onSubmit={handleContactSubmit} className={styles.contactForm}>
-              <input
-                type="text"
-                placeholder="Tên của bạn *"
-                value={contactName}
-                onChange={(e) => setContactName(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Số điện thoại của bạn *"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                required
-              />
-              <input
-                type="email"
-                placeholder="Email liên hệ (nếu có)"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-              />
-              <textarea
-                placeholder="Nội dung cần tư vấn..."
-                rows={3}
-                value={contactMsg}
-                onChange={(e) => setContactMsg(e.target.value)}
-              />
-              <button type="submit" className={styles.formSubmitBtn} disabled={isSubmittingContact}>
-                <FiSend /> {isSubmittingContact ? "Đang gửi..." : "Gửi yêu cầu ngay"}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div className={styles.footerCopyright}>
-          <p>© {new Date().getFullYear()} VOYAGE Travel. Bảo lưu mọi quyền. Designed for luxury tourism experiences.</p>
-        </div>
-      </footer>
-
-      {/* Tour Detail Modal Client-Side */}
-      {isTourModalOpen && (
-        <div className={styles.modalOverlay} onClick={() => setIsTourModalOpen(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>Chi Tiết Tour Du Lịch</h3>
-              <button className={styles.closeModalBtn} onClick={() => setIsTourModalOpen(false)}>×</button>
-            </div>
-
-            <div className={styles.modalBody}>
-              {isLoadingTourDetail || !selectedTour ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '40px 0' }}>
-                  <div className="spinner"></div>
-                  <p style={{ fontSize: '14px', color: '#7f8c8d', fontWeight: '500' }}>Đang tải thông tin tour...</p>
-                </div>
-              ) : (
-                <>
-                  <div className={styles.modalSection}>
-                    <h4>Hình ảnh tour</h4>
-                    <div style={{ width: "100%", height: "260px", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-                      <img
-                        src={getImageUrl(selectedTour.thumbnail)}
-                        alt={selectedTour.title}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&h=300&q=80";
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.modalSection}>
-                    <h4>Thông tin cơ bản hành trình</h4>
-                    <div className={styles.modalGrid}>
-                      <div className={styles.modalSection} style={{ gap: '4px' }}>
-                        <span style={{ fontSize: '12px', color: '#7f8c8d', fontWeight: 700, textTransform: 'uppercase' }}>Tên Tour lữ hành</span>
-                        <span style={{ fontSize: '15px', color: '#2c3e50', fontWeight: 600 }}>{selectedTour.title}</span>
-                      </div>
-                      <div className={styles.modalSection} style={{ gap: '4px' }}>
-                        <span style={{ fontSize: '12px', color: '#7f8c8d', fontWeight: 700, textTransform: 'uppercase' }}>Thời lượng hành trình</span>
-                        <span style={{ fontSize: '15px', color: '#2c3e50', fontWeight: 600 }}>{selectedTour.durationDays} ngày {selectedTour.durationNights} đêm</span>
-                      </div>
-                      <div className={styles.modalSection} style={{ gap: '4px' }}>
-                        <span style={{ fontSize: '12px', color: '#7f8c8d', fontWeight: 700, textTransform: 'uppercase' }}>Điểm khởi hành</span>
-                        <span style={{ fontSize: '15px', color: '#2c3e50', fontWeight: 600 }}>{selectedTour.departure || "Hà Nội"}</span>
-                      </div>
-                      <div className={styles.modalSection} style={{ gap: '4px' }}>
-                        <span style={{ fontSize: '12px', color: '#7f8c8d', fontWeight: 700, textTransform: 'uppercase' }}>Giá tour trọn gói</span>
-                        <span style={{ fontSize: '16px', color: 'var(--primary, #e9680c)', fontWeight: 800 }}>
-                          {selectedTour.salePrices > 0 ? `${selectedTour.salePrices.toLocaleString("vi-VN")} ₫` : "Liên hệ"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {selectedTour.introduce && (
-                    <div className={styles.modalSection}>
-                      <h4>Giới thiệu ngắn & Lịch trình</h4>
-                      <div
-                        style={{ background: '#f8f9fb', padding: '16px', borderRadius: '12px', fontSize: '14px', lineHeight: '1.6', border: '1px solid #eef0f5' }}
-                        dangerouslySetInnerHTML={{ __html: selectedTour.introduce }}
-                      />
-                    </div>
-                  )}
-
-                  {selectedTour.description && (
-                    <div className={styles.modalSection}>
-                      <h4>Chính sách & Quy định Tour</h4>
-                      <div style={{ background: '#f8f9fb', padding: '16px', borderRadius: '12px', fontSize: '14px', lineHeight: '1.6', border: '1px solid #eef0f5', whiteSpace: 'pre-wrap' }}>
-                        {selectedTour.description}
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
-                    <button
-                      onClick={() => {
-                        setIsTourModalOpen(false);
-                        const contactSection = document.getElementById("contact");
-                        if (contactSection) {
-                          contactSection.scrollIntoView({ behavior: "smooth" });
-                        }
-                        setContactMsg(`Tôi muốn nhận tư vấn đặt Tour: ${selectedTour.title}`);
-                      }}
-                      className={styles.contactBtn}
-                      style={{ flex: 1 }}
-                    >
-                      Liên hệ đăng ký nhận tư vấn ngay
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

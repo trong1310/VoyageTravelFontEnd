@@ -76,7 +76,14 @@ export const tourService = {
       payload
     );
   },
-  getClientTours: async (payload: { limit: number; page: number; isHot?: number | null; ranking?: number | null }): Promise<any> => {
+  getClientTours: async (payload: {
+    limit: number;
+    page: number;
+    isHot?: number | null;
+    ranking?: number | null;
+    departures?: string[];
+    destinations?: string[];
+  }): Promise<any> => {
     return axiosClient.post(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientTour`,
       payload
@@ -97,6 +104,25 @@ export const tourService = {
   getTourDetail: async (slug: string): Promise<any> => {
     return axiosClient.get(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Tours/detail/${slug}`
+    );
+  },
+  getClientTourDetail: async (slug: string): Promise<any> => {
+    return axiosClient.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientTour/detail/${slug}`
+    );
+  },
+  bookTour: async (payload: {
+    slug: string;
+    startTime: string;
+    totalCustomer: number;
+    fullName: string;
+    phoneNumber: string;
+    email: string;
+    specialRequirements: string;
+  }): Promise<any> => {
+    return axiosClient.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientTour/booking`,
+      payload
     );
   },
   updateTour: async (payload: TourUpdateRequest): Promise<TourCreateResponse> => {

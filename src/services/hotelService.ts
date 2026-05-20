@@ -1,26 +1,27 @@
 import axiosClient from "./index";
 
-export interface HotelGetRequest {
+export interface ClientHotelGetRequest {
   limit: number;
   page: number;
-  keyword: string;
-  ranking: number | null;
+  isHot?: number | null;
+  ranking?: number | null;
+  type?: number | null;
+  locations?: string[];
 }
 
 export interface HotelItem {
-  slug: string;
   name: string;
   type: number;
   ranking: string;
-  createdAt: string;
   relativePrice: number;
+  slug: string;
   thumbnail: string;
   locations: string;
   address: string;
   isHot: number;
 }
 
-export interface HotelGetResponse {
+export interface ClientHotelGetResponse {
   error: {
     code: number;
     message: string;
@@ -34,43 +35,31 @@ export interface HotelGetResponse {
   };
 }
 
-export interface HotelCreateRequest {
-  name: string;
-  introduce: string;
-  type: number; // e.g. 1: Khách sạn, 2: Resort, 3: Homestay
-  isHot: number;
-  ranking: number;
-  relativePrice: number;
-  thumbnail: string;
-  regulations: string;
-  slugLocations: string;
-  description: string;
-  address: string;
-  imagesUrl: string[];
-}
-
-export interface HotelUpdateRequest extends HotelCreateRequest {
+export interface HotelBookingRequest {
   slug: string;
-}
-
-export interface HotelCreateResponse {
-  error: {
-    code: number;
-    message: string;
-  };
-  data: any;
+  startTime: string;
+  totalCustomer: number;
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  specialRequirements: string;
 }
 
 export const hotelService = {
-  getHotels: async (payload: HotelGetRequest): Promise<HotelGetResponse> => {
+  getClientHotels: async (payload: ClientHotelGetRequest): Promise<ClientHotelGetResponse> => {
     return axiosClient.post(
-      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Hotels/get`,
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientHotels`,
       payload
     );
   },
-  createHotel: async (payload: HotelCreateRequest): Promise<HotelCreateResponse> => {
+  getClientHotelDetail: async (slug: string): Promise<any> => {
     return axiosClient.post(
-      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Hotels/create`,
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientHotels/detail/${slug}`
+    );
+  },
+  bookHotel: async (payload: HotelBookingRequest): Promise<any> => {
+    return axiosClient.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientHotels/booking`,
       payload
     );
   },
@@ -78,22 +67,6 @@ export const hotelService = {
     return axiosClient.post(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Common/locations`,
       { limit: 0, page: 0 }
-    );
-  },
-  getHotelDetail: async (slug: string): Promise<any> => {
-    return axiosClient.get(
-      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Hotels/detail/${slug}`
-    );
-  },
-  updateHotel: async (payload: HotelUpdateRequest): Promise<HotelCreateResponse> => {
-    return axiosClient.post(
-      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Hotels/update`,
-      payload
-    );
-  },
-  deleteHotel: async (slug: string): Promise<any> => {
-    return axiosClient.post(
-      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/Hotels/delete/${slug}`
     );
   },
 };

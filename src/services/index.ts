@@ -36,6 +36,13 @@ axiosClient.interceptors.response.use(
     return response;
   },
   (error: any) => {
+    if (error.response && (error.response.status === 401 || error.response.data?.statusCode === 401)) {
+      store.dispatch(logout());
+      if (typeof window !== "undefined") {
+        window.location.href = "/admin/login";
+      }
+    }
+
     if (error.response && error.response.data) {
       throw error.response.data;
     }
@@ -80,6 +87,9 @@ export const httpRequest = async ({
     ) {
       store.dispatch(logout());
       toastWarn({ msg: "Hết hạn đăng nhập" });
+      if (typeof window !== "undefined") {
+        window.location.href = "/admin/login";
+      }
     } else if (typeof err == "string") {
       showMessageFailed && toastWarn({ msg: err || "Có lỗi đã xảy ra" });
     } else if (

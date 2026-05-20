@@ -1,7 +1,7 @@
-import { Fragment, ReactElement, useEffect } from "react";
-
+import { Fragment, ReactElement } from "react";
 import Head from "next/head";
 import MainIndex from "~/components/MainIndex";
+import ClientLayout from "~/components/layout/ClientLayout";
 
 export default function Page() {
   return (
@@ -16,5 +16,6 @@ export default function Page() {
 }
 
 Page.getLayout = function (page: ReactElement) {
-  return page;
+  return <ClientLayout>{page}</ClientLayout>;
 };
+
