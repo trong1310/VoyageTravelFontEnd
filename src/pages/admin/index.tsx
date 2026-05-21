@@ -1,53 +1,84 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AdminLayout from "~/components/layout/AdminLayout/AdminLayout";
 import styles from "./AdminDashboard.module.scss";
 import { FiTrendingUp, FiCompass, FiBriefcase, FiCalendar, FiArrowRight, FiCheckCircle, FiClock, FiXCircle } from "react-icons/fi";
 import Link from "next/link";
 import clsx from "clsx";
-
-interface BookingItem {
-  id: string;
-  customer: string;
-  service: string;
-  type: "Tour" | "Khách sạn";
-  date: string;
-  amount: string;
-  status: "Pending" | "Confirmed" | "Completed" | "Cancelled";
-}
+import { statisticsService, StatisticsData } from "~/services/statisticsService";
+import { bookingService, BookingAdminItem } from "~/services/bookingService";
+import { toast } from "react-toastify";
 
 export default function AdminDashboard() {
-  const stats = [
-    { title: "Tổng số Tour", value: "24", icon: FiCompass, color: "orange", desc: "4 tour mới thêm trong tháng" },
-    { title: "Tổng Khách sạn", value: "15", icon: FiBriefcase, color: "blue", desc: "Đang hoạt động trên 5 tỉnh thành" },
-    { title: "Lượt Bookings", value: "1,482", icon: FiCalendar, color: "green", desc: "+12% so với tháng trước" },
-    { title: "Doanh thu", value: "2.4B ₫", icon: FiTrendingUp, color: "purple", desc: "Mục tiêu đạt 3B trong Q2" },
+  const [statsData, setStatsData] = useState<StatisticsData | null>(null);
+  const [recentBookings, setRecentBookings] = useState<BookingAdminItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch stats
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const statsRes = await statisticsService.getStatistics({
+          limit: 0,
+          page: 0,
+          from: startOfMonth.toISOString(),
+          to: now.toISOString(),
+        });
+
+        if (statsRes?.error?.code === 0 && statsRes.data) {
+          setStatsData(statsRes.data);
+        }
+
+        // Fetch recent bookings
+        const bookingsRes = await bookingService.getBookings({
+          limit: 5,
+          page: 0,
+        });
+
+        if (bookingsRes?.error?.code === 0 && bookingsRes.data?.items) {
+          setRecentBookings(bookingsRes.data.items);
+        }
+
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+        toast.error("Không thể lấy dữ liệu dashboard từ máy chủ!");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const stats = statsData ? [
+    { title: "Tour Đang Mở", value: statsData.totalActiveTours.toString(), icon: FiCompass, color: "orange", desc: `Tổng số ${statsData.totalSoldTours} lượt tour bán ra` },
+    { title: "Khách Sạn Đang Mở", value: statsData.totalActiveHotels.toString(), icon: FiBriefcase, color: "blue", desc: `Tổng số ${statsData.totalSoldHotels} lượt phòng đã đặt` },
+    { title: "Xe Đang Cho Thuê", value: statsData.totalActiveCars.toString(), icon: FiTrendingUp, color: "purple", desc: `Đã có ${statsData.totalCustomerCars} lượt khách thuê` },
+    { title: "Tổng Booking Hệ Thống", value: (statsData.totalSoldTours + statsData.totalSoldHotels + statsData.totalCustomerCars).toString(), icon: FiCalendar, color: "green", desc: "Bao gồm tất cả các dịch vụ" },
+  ] : [
+    { title: "Tour Đang Mở", value: "-", icon: FiCompass, color: "orange", desc: "Đang tải dữ liệu..." },
+    { title: "Khách Sạn Đang Mở", value: "-", icon: FiBriefcase, color: "blue", desc: "Đang tải dữ liệu..." },
+    { title: "Xe Đang Cho Thuê", value: "-", icon: FiTrendingUp, color: "purple", desc: "Đang tải dữ liệu..." },
+    { title: "Tổng Booking Hệ Thống", value: "-", icon: FiCalendar, color: "green", desc: "Đang tải dữ liệu..." },
   ];
 
-  const recentBookings: BookingItem[] = [
-    { id: "BK-9824", customer: "Lê Minh Tuấn", service: "Combo Phú Quốc 3N2Đ - Pullman", type: "Tour", date: "19/05/2026", amount: "7,890,000 ₫", status: "Pending" },
-    { id: "BK-9823", customer: "Trần Thị Lan", service: "Hồ Tràm Beach Resort & Spa", type: "Khách sạn", date: "18/05/2026", amount: "3,500,000 ₫", status: "Confirmed" },
-    { id: "BK-9822", customer: "Nguyễn Văn Hùng", service: "Tour Vịnh Hạ Long Du Thuyền 5 Sao", type: "Tour", date: "18/05/2026", amount: "12,400,000 ₫", status: "Completed" },
-    { id: "BK-9821", customer: "Phạm Thảo Vy", service: "InterContinental Đà Nẵng Resort", type: "Khách sạn", date: "17/05/2026", amount: "9,200,000 ₫", status: "Cancelled" },
-    { id: "BK-9820", customer: "Đỗ Hoàng Nam", service: "Tour Đà Lạt Ngàn Hoa 4N3Đ", type: "Tour", date: "16/05/2026", amount: "5,600,000 ₫", status: "Confirmed" },
-  ];
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "Pending": return styles.badgePending;
-      case "Confirmed": return styles.badgeConfirmed;
-      case "Completed": return styles.badgeCompleted;
-      case "Cancelled": return styles.badgeCancelled;
+  const getStatusBadgeClass = (state: number) => {
+    switch (state) {
+      case 1: return styles.badgePending;
+      case 2: return styles.badgeCompleted;
+      case 3: return styles.badgeCancelled;
       default: return "";
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "Pending": return "Chờ xử lý";
-      case "Confirmed": return "Đã xác nhận";
-      case "Completed": return "Đã hoàn thành";
-      case "Cancelled": return "Đã hủy";
-      default: return "";
+  const getStatusLabel = (state: number) => {
+    switch (state) {
+      case 1: return "Chưa xử lý";
+      case 2: return "Đã xác nhận";
+      case 3: return "Hủy đơn";
+      default: return "Chưa xác định";
     }
   };
 
@@ -91,40 +122,37 @@ export default function AdminDashboard() {
         {/* Custom Visual Performance Chart */}
         <div className={styles.chartCard}>
           <div className={styles.cardHeader}>
-            <h3>Thống kê lượt Bookings 6 tháng gần nhất</h3>
+            <h3>Phân tích tỷ trọng đặt dịch vụ thực tế</h3>
             <span className={styles.chartLegend}>
-              <span className={styles.legendColorTour} /> Tour
-              <span className={styles.legendColorHotel} /> Khách sạn
+              <span className={styles.legendColorTour} /> Lượt đặt thành công
             </span>
           </div>
           <div className={styles.chartBody}>
-            {/* Elegant SVG-based bar chart for zero runtime exceptions and perfect rendering */}
-            <div className={styles.customChartContainer}>
+            <div className={styles.customChartContainer} style={{ justifyContent: 'space-around' }}>
               {[
-                { month: "T12", tour: 110, hotel: 90 },
-                { month: "T01", tour: 130, hotel: 105 },
-                { month: "T02", tour: 155, hotel: 120 },
-                { month: "T03", tour: 120, hotel: 95 },
-                { month: "T04", tour: 180, hotel: 140 },
-                { month: "T05", tour: 220, hotel: 175 },
+                { name: "Tour du lịch", value: statsData?.totalSoldTours || 0, colorClass: styles.barTour },
+                { name: "Khách sạn", value: statsData?.totalSoldHotels || 0, colorClass: styles.barHotel },
+                { name: "Xe du lịch", value: statsData?.totalCustomerCars || 0, colorClass: styles.barCar },
               ].map((data, idx) => {
-                const tourHeight = `${(data.tour / 250) * 100}%`;
-                const hotelHeight = `${(data.hotel / 250) * 100}%`;
+                const maxValue = Math.max(
+                  statsData?.totalSoldTours || 0,
+                  statsData?.totalSoldHotels || 0,
+                  statsData?.totalCustomerCars || 0,
+                  1
+                );
+                const heightPercent = `${(data.value / maxValue) * 100}%`;
                 return (
-                  <div key={idx} className={styles.chartColumn}>
-                    <div className={styles.barGroup}>
+                  <div key={idx} className={styles.chartColumn} style={{ width: '120px' }}>
+                    <div className={styles.barGroup} style={{ height: '140px', justifyContent: 'center' }}>
                       <div
-                        className={styles.barTour}
-                        style={{ height: tourHeight }}
-                        title={`Tour: ${data.tour} bookings`}
-                      />
-                      <div
-                        className={styles.barHotel}
-                        style={{ height: hotelHeight }}
-                        title={`Khách sạn: ${data.hotel} bookings`}
+                        className={data.colorClass}
+                        style={{ height: heightPercent, width: '40px', transition: 'height 0.5s ease-out' }}
+                        title={`${data.name}: ${data.value} lượt đặt`}
                       />
                     </div>
-                    <span className={styles.chartMonthLabel}>{data.month}</span>
+                    <span className={styles.chartMonthLabel} style={{ marginTop: '8px', fontSize: '12px', fontWeight: 'bold' }}>
+                      {data.name} ({data.value})
+                    </span>
                   </div>
                 );
               })}
@@ -143,8 +171,8 @@ export default function AdminDashboard() {
                 <FiClock />
               </div>
               <div className={styles.opsContent}>
-                <h4>5 Bookings cần duyệt gấp</h4>
-                <p>Khách hàng đang chờ phản hồi xác nhận phòng từ hệ thống</p>
+                <h4>Bookings cần duyệt gấp</h4>
+                <p>Kiểm tra các khách hàng đang chờ phản hồi xác nhận từ hệ thống</p>
               </div>
             </div>
             <div className={styles.opsItem}>
@@ -152,8 +180,8 @@ export default function AdminDashboard() {
                 <FiCheckCircle />
               </div>
               <div className={styles.opsContent}>
-                <h4>12 Tour khởi hành trong ngày</h4>
-                <p>Hướng dẫn viên đã nhận đủ danh sách đoàn và khởi hành tốt đẹp</p>
+                <h4>Tour khởi hành trong ngày</h4>
+                <p>Hướng dẫn viên đã nhận đủ danh sách đoàn và chuẩn bị tốt nhất</p>
               </div>
             </div>
             <div className={styles.opsItem}>
@@ -161,7 +189,7 @@ export default function AdminDashboard() {
                 <FiCalendar />
               </div>
               <div className={styles.opsContent}>
-                <h4>8 phòng Check-in hôm nay</h4>
+                <h4>Phòng Check-in hôm nay</h4>
                 <p>Đã liên hệ khách sạn chuẩn bị phòng đón tiếp chu đáo</p>
               </div>
             </div>
@@ -186,36 +214,49 @@ export default function AdminDashboard() {
                 <th>Dịch vụ</th>
                 <th>Loại hình</th>
                 <th>Ngày đặt</th>
-                <th>Tổng thanh toán</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
-              {recentBookings.map((bk) => (
-                <tr key={bk.id}>
-                  <td className={styles.bookingId}>{bk.id}</td>
-                  <td className={styles.customerName}>{bk.customer}</td>
-                  <td className={styles.serviceName}>{bk.service}</td>
-                  <td>
-                    <span className={clsx(styles.typePill, bk.type === "Tour" ? styles.typeTour : styles.typeHotel)}>
-                      {bk.type}
-                    </span>
-                  </td>
-                  <td>{bk.date}</td>
-                  <td className={styles.amount}>{bk.amount}</td>
-                  <td>
-                    <span className={clsx(styles.statusBadge, getStatusBadgeClass(bk.status))}>
-                      {getStatusLabel(bk.status)}
-                    </span>
-                  </td>
-                  <td>
-                    <Link href={`/admin/bookings/${bk.id}`} className={styles.detailBtn}>
-                      Chi tiết
-                    </Link>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "40px" }}>
+                    <div className="spinner" style={{ margin: "0 auto" }}></div>
+                    <p style={{ marginTop: "16px", color: "#7f8c8d" }}>Đang tải danh sách Bookings...</p>
                   </td>
                 </tr>
-              ))}
+              ) : recentBookings.length > 0 ? (
+                recentBookings.map((bk) => (
+                  <tr key={bk.uuid}>
+                    <td className={styles.bookingId}>{bk.uuid.split('-')[0].toUpperCase()}</td>
+                    <td className={styles.customerName}>{bk.fullName}</td>
+                    <td className={styles.serviceName}>{bk.serviceName}</td>
+                    <td>
+                      <span className={clsx(styles.typePill, bk.categoryName === "Tour" ? styles.typeTour : styles.typeHotel)}>
+                        {bk.categoryName}
+                      </span>
+                    </td>
+                    <td>{new Date(bk.createdAt).toLocaleDateString("vi-VN")}</td>
+                    <td>
+                      <span className={clsx(styles.statusBadge, getStatusBadgeClass(bk.state))}>
+                        {getStatusLabel(bk.state)}
+                      </span>
+                    </td>
+                    <td>
+                      <Link href={`/admin/bookings/${bk.uuid}`} className={styles.detailBtn}>
+                        Chi tiết
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#7f8c8d" }}>
+                    Chưa có đơn đặt hàng nào trong hệ thống.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

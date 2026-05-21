@@ -1,124 +1,98 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AdminLayout from "~/components/layout/AdminLayout/AdminLayout";
 import styles from "./Bookings.module.scss";
-import { FiSearch, FiCalendar, FiArrowRight, FiInfo, FiCheck, FiX, FiCheckSquare } from "react-icons/fi";
+import { FiSearch, FiCalendar, FiArrowRight, FiInfo, FiCheck, FiX, FiCheckSquare, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 import { toast } from "react-toastify";
-
-interface BookingItem {
-  id: string;
-  code: string;
-  customerName: string;
-  customerPhone: string;
-  serviceName: string;
-  type: "Tour" | "Khách sạn";
-  travelDate: string;
-  totalAmount: string;
-  status: "Pending" | "Confirmed" | "Completed" | "Cancelled";
-}
+import { bookingService, BookingAdminItem } from "~/services/bookingService";
 
 export default function BookingsLedger() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [keyword, setKeyword] = useState("");
+  const [bookings, setBookings] = useState<BookingAdminItem[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [pagination, setPagination] = useState({ totalCount: 0, totalPage: 0 });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [bookings, setBookings] = useState<BookingItem[]>([
-    {
-      id: "1",
-      code: "BK-9824",
-      customerName: "Lê Minh Tuấn",
-      customerPhone: "0912345678",
-      serviceName: "Combo Phú Quốc 3N2Đ - Pullman Beach Resort Siêu Vip",
-      type: "Tour",
-      travelDate: "28/05/2026",
-      totalAmount: "7,890,000 ₫",
-      status: "Pending",
-    },
-    {
-      id: "2",
-      code: "BK-9823",
-      customerName: "Trần Thị Lan",
-      customerPhone: "0987654321",
-      serviceName: "Hồ Tràm Beach Resort & Spa (Deluxe Ocean View)",
-      type: "Khách sạn",
-      travelDate: "05/06/2026",
-      totalAmount: "3,500,000 ₫",
-      status: "Confirmed",
-    },
-    {
-      id: "3",
-      code: "BK-9822",
-      customerName: "Nguyễn Văn Hùng",
-      customerPhone: "0909998887",
-      serviceName: "Tour Vịnh Hạ Long Du Thuyền 5 Sao Ambassador",
-      type: "Tour",
-      travelDate: "18/05/2026",
-      totalAmount: "12,400,000 ₫",
-      status: "Completed",
-    },
-    {
-      id: "4",
-      code: "BK-9821",
-      customerName: "Phạm Thảo Vy",
-      customerPhone: "0933445566",
-      serviceName: "InterContinental Đà Nẵng Sun Peninsula (Beach Suite)",
-      type: "Khách sạn",
-      travelDate: "20/05/2026",
-      totalAmount: "9,200,000 ₫",
-      status: "Cancelled",
-    },
-    {
-      id: "5",
-      code: "BK-9820",
-      customerName: "Đỗ Hoàng Nam",
-      customerPhone: "0977889900",
-      serviceName: "Tour Đà Lạt Ngàn Hoa 4N3Đ (Wonder Resort)",
-      type: "Tour",
-      travelDate: "01/06/2026",
-      totalAmount: "5,600,000 ₫",
-      status: "Confirmed",
-    },
-  ]);
+  const fetchBookings = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await bookingService.getBookings({
+        limit,
+        page: page - 1,
+        keyword,
+      });
 
-  const handleUpdateStatus = (id: string, newStatus: "Confirmed" | "Cancelled" | "Completed") => {
-    setBookings(bookings.map(b => {
-      if (b.id === id) {
-        return { ...b, status: newStatus };
+      if (res && res.error && res.error.code === 0) {
+        setBookings(res.data.items || []);
+        setPagination({
+          totalCount: res.data.pagination?.totalCount || 0,
+          totalPage: res.data.pagination?.totalPage || 0,
+        });
+      } else {
+        toast.error(res?.error?.message || "Không thể tải danh sách bookings!");
       }
-      return b;
-    }));
-    toast.success(`Đã cập nhật trạng thái đơn hàng sang ${
-      newStatus === "Confirmed" ? "Đã xác nhận" : newStatus === "Cancelled" ? "Đã hủy" : "Đã hoàn thành"
-    }`);
+    } catch (err: any) {
+      console.error("Error fetching bookings:", err);
+      toast.error("Có lỗi xảy ra khi kết nối máy chủ!");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, limit, keyword]);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
+
+  const handleUpdateStatus = async (uuid: string, newState: number) => {
+    try {
+      const res = await bookingService.updateBookingState(uuid, newState);
+      if (res && res.error && res.error.code === 0) {
+        toast.success("Cập nhật trạng thái thành công!");
+        fetchBookings();
+      } else {
+        toast.error(res?.error?.message || "Lỗi khi cập nhật trạng thái!");
+      }
+    } catch (err) {
+      console.error("Error updating state:", err);
+      toast.error("Không thể kết nối máy chủ!");
+    }
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "Pending": return styles.badgePending;
-      case "Confirmed": return styles.badgeConfirmed;
-      case "Completed": return styles.badgeCompleted;
-      case "Cancelled": return styles.badgeCancelled;
+  const handleDelete = async (uuid: string) => {
+    if (confirm("Bạn có chắc chắn muốn xóa đơn đặt này? Hành động này không thể hoàn tác.")) {
+      try {
+        const res = await bookingService.deleteBooking(uuid);
+        if (res && res.error && res.error.code === 0) {
+          toast.success("Xóa đơn đặt thành công!");
+          fetchBookings();
+        } else {
+          toast.error(res?.error?.message || "Lỗi khi xóa đơn đặt!");
+        }
+      } catch (err) {
+        console.error("Error deleting booking:", err);
+        toast.error("Không thể kết nối máy chủ!");
+      }
+    }
+  };
+
+  const getStatusBadgeClass = (state: number) => {
+    switch (state) {
+      case 1: return styles.badgePending;
+      case 2: return styles.badgeCompleted;
+      case 3: return styles.badgeCancelled;
       default: return "";
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "Pending": return "Chờ xử lý";
-      case "Confirmed": return "Đã xác nhận";
-      case "Completed": return "Đã hoàn thành";
-      case "Cancelled": return "Đã hủy";
-      default: return "";
+  const getStatusLabel = (state: number) => {
+    switch (state) {
+      case 1: return "Chưa xử lý";
+      case 2: return "Đã xác nhận";
+      case 3: return "Hủy đơn";
+      default: return "Chưa xác định";
     }
   };
-
-  // Filters
-  const filteredBookings = bookings.filter(b => {
-    const matchesSearch = b.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || b.code.toLowerCase().includes(searchQuery.toLowerCase()) || b.customerPhone.includes(searchQuery);
-    const matchesType = typeFilter === "All" || b.type === typeFilter;
-    const matchesStatus = statusFilter === "All" || b.status === statusFilter;
-    return matchesSearch && matchesType && matchesStatus;
-  });
 
   return (
     <div className={styles.container}>
@@ -135,129 +109,153 @@ export default function BookingsLedger() {
           <FiSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Tìm theo khách hàng, số điện thoại..."
+            value={keyword}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setPage(1); // Reset to page 1 on filter change
+            }}
           />
-        </div>
-
-        <div className={styles.filtersGroup}>
-          <div className={styles.filterSelect}>
-            <label>Dịch vụ</label>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-              <option value="All">Tất cả dịch vụ</option>
-              <option value="Tour">Combo & Tours</option>
-              <option value="Khách sạn">Khách sạn / Resort</option>
-            </select>
-          </div>
-
-          <div className={styles.filterSelect}>
-            <label>Trạng thái</label>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="All">Tất cả trạng thái</option>
-              <option value="Pending">Chờ xử lý</option>
-              <option value="Confirmed">Đã xác nhận</option>
-              <option value="Completed">Đã hoàn thành</option>
-              <option value="Cancelled">Đã hủy</option>
-            </select>
-          </div>
         </div>
       </div>
 
       {/* Ledger Table */}
       <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.customTable}>
-            <thead>
-              <tr>
-                <th>Mã Đơn</th>
-                <th>Khách Hàng</th>
-                <th>Tên Dịch Vụ</th>
-                <th style={{ textAlign: "center" }}>Phân loại</th>
-                <th>Ngày khởi hành / check-in</th>
-                <th style={{ textAlign: "right" }}>Tổng số tiền</th>
-                <th style={{ textAlign: "center" }}>Trạng thái</th>
-                <th style={{ textAlign: "center", width: "160px" }}>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.length > 0 ? (
-                filteredBookings.map((b) => (
-                  <tr key={b.id}>
-                    <td className={styles.bookingCode}>{b.code}</td>
-                    <td>
-                      <div className={styles.customerCell}>
-                        <span className={styles.customerName}>{b.customerName}</span>
-                        <span className={styles.customerPhone}>{b.customerPhone}</span>
-                      </div>
-                    </td>
-                    <td className={styles.serviceCell}>{b.serviceName}</td>
-                    <td style={{ textAlign: "center" }}>
-                      <span className={b.type === "Tour" ? styles.typeTour : styles.typeHotel}>
-                        {b.type}
-                      </span>
-                    </td>
-                    <td>
-                      <div className={styles.dateCell}>
-                        <FiCalendar style={{ marginRight: "4px", color: "var(--primary)" }} /> {b.travelDate}
-                      </div>
-                    </td>
-                    <td className={styles.amountCell}>{b.totalAmount}</td>
-                    <td style={{ textAlign: "center" }}>
-                      <span className={getStatusBadgeClass(b.status)}>
-                        {getStatusLabel(b.status)}
-                      </span>
-                    </td>
-                    <td>
-                      <div className={styles.actionsCell}>
-                        <Link href={`/admin/bookings/${b.code}`} className={styles.detailBtn} title="Xem hóa đơn chi tiết">
-                          <FiInfo />
-                        </Link>
-                        {b.status === "Pending" && (
-                          <>
-                            <button
-                              onClick={() => handleUpdateStatus(b.id, "Confirmed")}
-                              className={styles.approveBtn}
-                              title="Xác nhận đơn đặt"
-                            >
-                              <FiCheck />
-                            </button>
-                            <button
-                              onClick={() => handleUpdateStatus(b.id, "Cancelled")}
-                              className={styles.cancelBtn}
-                              title="Hủy đơn đặt"
-                            >
-                              <FiX />
-                            </button>
-                          </>
-                        )}
-                        {b.status === "Confirmed" && (
-                          <button
-                            onClick={() => handleUpdateStatus(b.id, "Completed")}
-                            className={styles.completeBtn}
-                            title="Hoàn thành dịch vụ"
-                          >
-                            <FiCheckSquare />
-                          </button>
-                        )}
-                      </div>
-                    </td>
+        {isLoading ? (
+          <div className={styles.loadingOverlay} style={{ padding: "40px", textAlign: "center" }}>
+            <span className="spinner" />
+            <p>Đang tải dữ liệu bookings...</p>
+          </div>
+        ) : (
+          <>
+            <div className={styles.tableWrapper}>
+              <table className={styles.customTable}>
+                <thead>
+                  <tr>
+                    <th>Mã Đơn</th>
+                    <th>Khách Hàng</th>
+                    <th>Tên Dịch Vụ</th>
+                    <th style={{ textAlign: "center" }}>Phân loại</th>
+                    <th>Ngày tạo</th>
+                    <th style={{ textAlign: "center" }}>Trạng thái</th>
+                    <th style={{ textAlign: "center", width: "160px" }}>Hành động</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className={styles.emptyCell}>
-                    <FiInfo className={styles.emptyIcon} />
-                    <p>Không tìm thấy booking nào thỏa mãn bộ lọc tìm kiếm.</p>
-                  </td>
-                </tr>
+                </thead>
+                <tbody>
+                  {bookings.length > 0 ? (
+                    bookings.map((b) => (
+                      <tr key={b.uuid}>
+                        <td className={styles.bookingCode}>
+                           {b.uuid.split('-')[0].toUpperCase()}
+                        </td>
+                        <td>
+                          <div className={styles.customerCell}>
+                            <span className={styles.customerName}>{b.fullName}</span>
+                            <span className={styles.customerPhone}>{b.phoneNumber}</span>
+                          </div>
+                        </td>
+                        <td className={styles.serviceCell}>{b.serviceName}</td>
+                        <td style={{ textAlign: "center" }}>
+                          <span className={b.categoryName === "Tour" ? styles.typeTour : styles.typeHotel}>
+                            {b.categoryName}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.dateCell}>
+                            <FiCalendar style={{ marginRight: "4px", color: "var(--primary)" }} /> 
+                            {new Date(b.createdAt).toLocaleDateString("vi-VN")}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <span className={getStatusBadgeClass(b.state)}>
+                            {getStatusLabel(b.state)}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.actionsCell}>
+                            <Link href={`/admin/bookings/${b.uuid}`} className={styles.detailBtn} title="Xem hóa đơn chi tiết">
+                              <FiInfo />
+                            </Link>
+                            {b.state === 1 && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateStatus(b.uuid, 2)}
+                                  className={styles.approveBtn}
+                                  title="Xác nhận & xử lý đơn đặt"
+                                >
+                                  <FiCheck />
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateStatus(b.uuid, 3)}
+                                  className={styles.cancelBtn}
+                                  title="Hủy đơn đặt"
+                                >
+                                  <FiX />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleDelete(b.uuid)}
+                              className={styles.cancelBtn}
+                              title="Xóa đơn đặt vĩnh viễn"
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className={styles.emptyCell}>
+                        <FiInfo className={styles.emptyIcon} />
+                        <p>Không tìm thấy booking nào thỏa mãn điều kiện.</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Pagination footer */}
+            <div className={styles.tableFooter}>
+              <span>Hiển thị <strong>{bookings.length}</strong> trên <strong>{pagination.totalCount}</strong> đơn bookings</span>
+
+              {pagination.totalPage > 1 && (
+                <ul className={styles.paginationList}>
+                  <li>
+                    <button
+                      className={styles.pageBtn}
+                      disabled={page === 1}
+                      onClick={() => setPage(prev => prev - 1)}
+                    >
+                      Trước
+                    </button>
+                  </li>
+                  {Array.from({ length: pagination.totalPage }, (_, i) => i + 1).map((p) => (
+                    <li key={p}>
+                      <button
+                        className={`${styles.pageBtn} ${page === p ? styles.activePageBtn : ""}`}
+                        onClick={() => setPage(p)}
+                      >
+                        {p}
+                      </button>
+                    </li>
+                  ))}
+                  <li>
+                    <button
+                      className={styles.pageBtn}
+                      disabled={page === pagination.totalPage}
+                      onClick={() => setPage(prev => prev + 1)}
+                    >
+                      Sau
+                    </button>
+                  </li>
+                </ul>
               )}
-            </tbody>
-          </table>
-        </div>
-        <div className={styles.tableFooter}>
-          <span>Hiển thị <strong>{filteredBookings.length}</strong> trên <strong>{bookings.length}</strong> đơn bookings</span>
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

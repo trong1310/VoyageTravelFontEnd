@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { FiStar, FiClock, FiMapPin, FiChevronLeft, FiChevronRight, FiFilter } from "react-icons/fi";
+import { FiStar, FiMapPin, FiChevronLeft, FiChevronRight, FiFilter, FiHome } from "react-icons/fi";
 import ClientLayout from "~/components/layout/ClientLayout";
-import { tourService } from "~/services/tourService";
-import pageStyles from "./ToursPage.module.scss";
+import { hotelService } from "~/services/hotelService";
+import pageStyles from "./HotelsPage.module.scss";
 import indexStyles from "~/components/MainIndex/MainIndex.module.scss";
 
 const getImageUrl = (path: string) => {
@@ -17,30 +17,29 @@ const getImageUrl = (path: string) => {
   return `${apiBase}/${cleanPath}`;
 };
 
-export default function ToursList() {
+export default function HotelsList() {
   // Raw metadata states
   const [locations, setLocations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Search & filter states
-  const [selectedDepartures, setSelectedDepartures] = useState<string[]>([]);
-  const [selectedDestinations, setSelectedDestinations] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedRanking, setSelectedRanking] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("all"); // e.g. type: 1 for Hotel, 2 for Resort
 
   // Dropdown open states
-  const [isDepartureOpen, setIsDepartureOpen] = useState(false);
-  const [isDestinationOpen, setIsDestinationOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
 
   // Pagination & fetched list states
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredTours, setFilteredTours] = useState<any[]>([]);
+  const [filteredHotels, setFilteredHotels] = useState<any[]>([]);
   const [totalPage, setTotalPage] = useState(1);
 
-  // 1. Fetch initial metadata (Locations) to populate both Departures and Destinations dropdowns
+  // 1. Fetch initial metadata (Locations)
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const res = await tourService.getLocations();
+        const res = await hotelService.getLocations();
         if (res && res.error && res.error.code === 0) {
           setLocations(res.data.items || []);
         }
@@ -54,15 +53,14 @@ export default function ToursList() {
   // 2. Document click to close dropdowns
   useEffect(() => {
     const handleDocumentClick = () => {
-      setIsDepartureOpen(false);
-      setIsDestinationOpen(false);
+      setIsLocationOpen(false);
     };
     document.addEventListener("click", handleDocumentClick);
     return () => document.removeEventListener("click", handleDocumentClick);
   }, []);
 
-  // 3. Fetch tours dynamically from API whenever filters or pagination change
-  const fetchTours = useCallback(async () => {
+  // 3. Fetch hotels dynamically from API whenever filters or pagination change
+  const fetchHotels = useCallback(async () => {
     setIsLoading(true);
     try {
       const payload = {
@@ -70,140 +68,109 @@ export default function ToursList() {
         page: currentPage - 1,
         isHot: null,
         ranking: selectedRanking === "all" ? null : Number(selectedRanking),
-        departures: selectedDepartures,
-        destinations: selectedDestinations,
+        type: selectedType === "all" ? null : Number(selectedType),
+        locations: selectedLocations,
       };
 
-      const res = await tourService.getClientTours(payload);
+      const res = await hotelService.getClientHotels(payload);
       if (res && res.error && res.error.code === 0) {
-        setFilteredTours(res.data.items || []);
+        setFilteredHotels(res.data.items || []);
         setTotalPage(res.data.pagination?.totalPage || 1);
       }
     } catch (err) {
-      console.error("Error fetching client tours:", err);
+      console.error("Error fetching client hotels:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, selectedDepartures, selectedDestinations, selectedRanking]);
+  }, [currentPage, selectedLocations, selectedRanking, selectedType]);
 
   useEffect(() => {
-    fetchTours();
-  }, [fetchTours]);
+    fetchHotels();
+  }, [fetchHotels]);
 
-  const handleToggleDeparture = (dept: string) => {
-    setSelectedDepartures((prev) =>
-      prev.includes(dept) ? prev.filter((d) => d !== dept) : [...prev, dept]
-    );
-    setCurrentPage(1);
-  };
-
-  const handleToggleDestination = (destName: string) => {
-    setSelectedDestinations((prev) =>
-      prev.includes(destName) ? prev.filter((d) => d !== destName) : [...prev, destName]
+  const handleToggleLocation = (locSlug: string) => {
+    setSelectedLocations((prev) =>
+      prev.includes(locSlug) ? prev.filter((l) => l !== locSlug) : [...prev, locSlug]
     );
     setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
-    setSelectedDepartures([]);
-    setSelectedDestinations([]);
+    setSelectedLocations([]);
     setSelectedRanking("all");
+    setSelectedType("all");
     setCurrentPage(1);
   };
 
   return (
     <>
       <Head>
-        <title>Tour Du Lịch Trọn Gói - VOYAGE Travel</title>
-        <meta name="description" content="Danh sách các tour du lịch nghỉ dưỡng trọn gói cao cấp và hấp dẫn nhất của VOYAGE Travel." />
+        <title>Khách Sạn & Khu Nghỉ Dưỡng - VOYAGE Travel</title>
+        <meta name="description" content="Danh sách các khách sạn và resort cao cấp tiện nghi của VOYAGE Travel." />
       </Head>
 
       <div className={pageStyles.container}>
         <div className={pageStyles.heroHeader}>
-          <h1 className={pageStyles.title}>Hành Trình Du Lịch Lữ Hành</h1>
+          <h1 className={pageStyles.title}>Hệ Thống Lưu Trú Tiện Nghi</h1>
           <p className={pageStyles.subtitle}>
-            Tìm kiếm tour nghỉ dưỡng mơ ước của bạn. Chúng tôi mang đến những chuyến đi thiết kế chuẩn mực, trọn gói cao cấp và phục vụ chu đáo nhất.
+            Trải nghiệm dịch vụ lưu trú đẳng cấp tại các khách sạn và khu nghỉ dưỡng hàng đầu. Phục vụ chu đáo, mang đến giấc ngủ vàng trên mọi hành trình.
           </p>
         </div>
 
         {/* Filter Widget Panel */}
         <div className={pageStyles.filterPanel}>
 
-          {/* Multi-Select Departure */}
+          {/* Multi-Select Location */}
           <div className={pageStyles.multiSelectWrapper} onClick={(e) => e.stopPropagation()}>
             <div
-              className={`${pageStyles.multiSelectHeader} ${isDepartureOpen ? pageStyles.active : ""}`}
+              className={`${pageStyles.multiSelectHeader} ${isLocationOpen ? pageStyles.active : ""}`}
               onClick={() => {
-                setIsDepartureOpen(!isDepartureOpen);
-                setIsDestinationOpen(false);
+                setIsLocationOpen(!isLocationOpen);
               }}
             >
-              {selectedDepartures.length === 0
-                ? "📍 Tất cả điểm đi"
-                : `📍 Điểm đi (${selectedDepartures.length})`}
+              {selectedLocations.length === 0
+                ? "📍 Tất cả khu vực"
+                : `📍 Khu vực (${selectedLocations.length})`}
             </div>
 
-            {isDepartureOpen && (
+            {isLocationOpen && (
               <div className={pageStyles.multiSelectDropdown}>
                 {locations.map((loc) => {
-                  const isChecked = selectedDepartures.includes(loc.slug);
+                  const isChecked = selectedLocations.includes(loc.slug);
                   return (
-                    <label key={`dept-${loc.slug}`} className={pageStyles.multiSelectItem}>
+                    <label key={`loc-${loc.slug}`} className={pageStyles.multiSelectItem}>
                       <input
                         type="checkbox"
                         checked={isChecked}
-                        onChange={() => handleToggleDeparture(loc.slug)}
+                        onChange={() => handleToggleLocation(loc.slug)}
                       />
-                      <span>Đi từ {loc.name}</span>
+                      <span>{loc.name}</span>
                     </label>
                   );
                 })}
                 {locations.length === 0 && (
                   <div style={{ fontSize: "12px", color: "#95a5a6", padding: "8px", textAlign: "center" }}>
-                    Không có dữ liệu điểm đi
+                    Không có dữ liệu khu vực
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Multi-Select Destination */}
-          <div className={pageStyles.multiSelectWrapper} onClick={(e) => e.stopPropagation()}>
-            <div
-              className={`${pageStyles.multiSelectHeader} ${isDestinationOpen ? pageStyles.active : ""}`}
-              onClick={() => {
-                setIsDestinationOpen(!isDestinationOpen);
-                setIsDepartureOpen(false);
-              }}
-            >
-              {selectedDestinations.length === 0
-                ? "🗺️ Tất cả điểm đến"
-                : `🗺️ Điểm đến (${selectedDestinations.length})`}
-            </div>
-
-            {isDestinationOpen && (
-              <div className={pageStyles.multiSelectDropdown}>
-                {locations.map((loc) => {
-                  const isChecked = selectedDestinations.includes(loc.slug);
-                  return (
-                    <label key={`dest-${loc.slug}`} className={pageStyles.multiSelectItem}>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => handleToggleDestination(loc.slug)}
-                      />
-                      <span>Đến {loc.name}</span>
-                    </label>
-                  );
-                })}
-                {locations.length === 0 && (
-                  <div style={{ fontSize: "12px", color: "#95a5a6", padding: "8px", textAlign: "center" }}>
-                    Không có dữ liệu điểm đến
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Type Selection */}
+          <select
+            className={pageStyles.filterSelect}
+            value={selectedType}
+            onChange={(e) => {
+              setSelectedType(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">Loại hình</option>
+            <option value="1">Khách sạn</option>
+            <option value="2">Resort</option>
+            <option value="3">Homestay</option>
+          </select>
 
           {/* Ranking Rating Selection */}
           <select
@@ -234,63 +201,58 @@ export default function ToursList() {
           <span>Danh sách hiển thị kết quả lọc tự động</span>
         </div>
 
-        {/* Tours Grid */}
+        {/* Hotels Grid */}
         {isLoading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: "100px 0" }}>
             <div className="spinner"></div>
           </div>
-        ) : filteredTours.length === 0 ? (
+        ) : filteredHotels.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px", background: "#ffffff", borderRadius: "20px", border: "1px solid #eef0f5" }}>
-            <p style={{ fontSize: "16px", color: "#7f8c8d", fontWeight: "600" }}>Không tìm thấy tour du lịch nào phù hợp với bộ lọc hiện tại.</p>
+            <p style={{ fontSize: "16px", color: "#7f8c8d", fontWeight: "600" }}>Không tìm thấy khách sạn nào phù hợp với bộ lọc hiện tại.</p>
             <button onClick={handleClearFilters} className={pageStyles.clearBtn} style={{ marginTop: "16px" }}>Quay lại danh sách</button>
           </div>
         ) : (
           <>
             <div className={indexStyles.tourGrid}>
-              {filteredTours.map((t) => (
-                <div key={t.slug} className={indexStyles.tourCard}>
+              {filteredHotels.map((h) => (
+                <div key={h.slug} className={indexStyles.tourCard}>
                   <div className={indexStyles.tourImageWrapper}>
-                    <Link href={`/tours/${t.slug}`}>
+                    <Link href={`/hotels/${h.slug}`}>
                       <img
-                        src={getImageUrl(t.thumbnail)}
-                        alt={t.title}
+                        src={getImageUrl(h.thumbnail)}
+                        alt={h.name}
                       />
                     </Link>
-                    {t.isHot === 1 && <span className={indexStyles.hotTag}>Hot 🔥</span>}
+                    {h.isHot === 1 && <span className={indexStyles.hotTag}>Hot 🔥</span>}
                     <span className={indexStyles.ratingTag}>
-                      <FiStar /> {t.ranking || "5.0"}
+                      <FiStar /> {h.ranking || "5.0"}
                     </span>
                   </div>
 
                   <div className={indexStyles.tourContent}>
                     <div className={indexStyles.tourMeta}>
                       <span className={indexStyles.metaItem}>
-                        <FiClock /> {t.durations || (t.durationDays ? `${t.durationDays}N${t.durationNights}Đ` : "3N2Đ")}
+                        <FiHome /> {h.type === 1 ? 'Khách sạn' : h.type === 2 ? 'Resort' : h.type === 3 ? 'Homestay' : 'Chỗ nghỉ'}
                       </span>
-                      <span className={indexStyles.metaItem}>
-                        <FiMapPin /> Khởi hành từ {t.departure || "Hà Nội"}
+                      <span className={indexStyles.metaItem} style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                        <FiMapPin /> {h.locations || h.address || "Việt Nam"}
                       </span>
                     </div>
 
                     <h3 className={indexStyles.tourTitle}>
-                      <Link href={`/tours/${t.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
-                        {t.title}
+                      <Link href={`/hotels/${h.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
+                        {h.name}
                       </Link>
                     </h3>
 
                     <div className={indexStyles.tourFooter}>
                       <div className={indexStyles.priceBox}>
-                        {t.originalPrices > 0 && (
-                          <span className={indexStyles.originalPrice}>
-                            {t.originalPrices.toLocaleString("vi-VN")} ₫
-                          </span>
-                        )}
                         <span className={indexStyles.salePrice}>
-                          {t.salePrices > 0 ? `${t.salePrices.toLocaleString("vi-VN")} ₫` : "Liên hệ"}
+                          {h.relativePrice > 0 ? `${h.relativePrice.toLocaleString("vi-VN")} ₫` : "Liên hệ"}
                         </span>
                       </div>
 
-                      <Link href={`/tours/${t.slug}`} className={indexStyles.detailBtn}>
+                      <Link href={`/hotels/${h.slug}`} className={indexStyles.detailBtn}>
                         Xem chi tiết
                       </Link>
                     </div>
@@ -334,6 +296,6 @@ export default function ToursList() {
   );
 }
 
-ToursList.getLayout = function getLayout(page: React.ReactElement) {
+HotelsList.getLayout = function getLayout(page: React.ReactElement) {
   return <ClientLayout>{page}</ClientLayout>;
 };

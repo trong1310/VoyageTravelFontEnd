@@ -38,11 +38,36 @@ export interface ClientHotelGetResponse {
 export interface HotelBookingRequest {
   slug: string;
   startTime: string;
+  endTime: string;
   totalCustomer: number;
   fullName: string;
   phoneNumber: string;
   email: string;
   specialRequirements: string;
+}
+
+export interface HotelDetailItem {
+  name: string;
+  type: number;
+  ranking: string;
+  relativePrice: number;
+  slug: string;
+  thumbnail: string;
+  slugLocations: string;
+  locations: string;
+  address: string;
+  introduce: string;
+  regulations: string;
+  isHot: number;
+  images: string[];
+}
+
+export interface ClientHotelDetailResponse {
+  error: {
+    code: number;
+    message: string;
+  };
+  data: HotelDetailItem;
 }
 
 export const hotelService = {
@@ -52,7 +77,7 @@ export const hotelService = {
       payload
     );
   },
-  getClientHotelDetail: async (slug: string): Promise<any> => {
+  getClientHotelDetail: async (slug: string): Promise<ClientHotelDetailResponse> => {
     return axiosClient.post(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1.1/ClientHotels/detail/${slug}`
     );

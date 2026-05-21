@@ -683,3 +683,45 @@
     border-color: rgba(231, 76, 60, 0.2);
   }
 }
+
+.paginationList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pageBtn {
+  background: #ffffff;
+  border: 1px solid #eef0f5;
+  color: #5c6b73;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+
+  &:hover:not(:disabled) {
+    background: #f8f9fb;
+    border-color: #bdc3c7;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.activePageBtn {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+
+  &:hover:not(:disabled) {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+}

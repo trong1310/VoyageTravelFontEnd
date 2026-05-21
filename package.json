@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 NODE_OPTIONS=--use-system-ca next dev --experimental-https",
+    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --experimental-https",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -70,6 +70,7 @@
     "slate-hyperscript": "^0.62.0",
     "slate-react": "^0.65.2",
     "slick-carousel": "1.8.1",
+    "undici": "^6.25.0",
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {

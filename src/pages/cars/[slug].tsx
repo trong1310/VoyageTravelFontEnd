@@ -151,13 +151,12 @@ export default function CarDetails() {
           <div className={styles.mainDetails}>
             {/* Gallery Image */}
             <div className={styles.galleryWrapper}>
-              <img
-                src={getImageUrl(car.thumbnail || car.thumbNail || "") || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&h=450&q=80"}
-                alt={car.name}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&h=450&q=80";
-                }}
-              />
+              {(car.thumbnail || car.thumbNail) && (
+                <img
+                  src={getImageUrl(car.thumbnail || car.thumbNail || "")}
+                  alt={car.name}
+                />
+              )}
             </div>
 
             {/* Title Area */}

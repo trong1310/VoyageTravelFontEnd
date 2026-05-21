@@ -317,11 +317,15 @@ function MainIndex({ }: PropsMainIndex) {
                 "https://images.unsplash.com/photo-1540979388789-6eca28045949?auto=format&fit=crop&w=300&h=300&q=80",
                 "https://images.unsplash.com/photo-1509060464153-4466739f78ad?auto=format&fit=crop&w=300&h=300&q=80"
               ];
+              const imageUrl = getImageUrl(loc.images) || fallbackImages[idx % fallbackImages.length];
               return (
                 <div key={loc.slug} className={styles.destCard}>
                   <img
-                    src={fallbackImages[idx % fallbackImages.length]}
+                    src={imageUrl}
                     alt={loc.name}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = fallbackImages[idx % fallbackImages.length];
+                    }}
                   />
                   <div className={styles.destOverlay}>
                     <span className={styles.destName}>{loc.name}</span>

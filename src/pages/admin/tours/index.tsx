@@ -192,14 +192,13 @@ export default function ToursManagement() {
                         <td>
                           <div className={styles.tourItemCell}>
                             {/* Thumbnail */}
-                            <img
-                              src={getImageUrl(t.thumbnail) || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=120&h=80&q=80"}
-                              alt={t.title}
-                              className={styles.tourThumb}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=120&h=80&q=80";
-                              }}
-                            />
+                            {t.thumbnail && (
+                              <img
+                                src={getImageUrl(t.thumbnail)}
+                                alt={t.title}
+                                className={styles.tourThumb}
+                              />
+                            )}
                             <div className={styles.tourMeta}>
                               <span className={styles.tourName}>{t.title}</span>
                               <span className={styles.tourSpecs}>

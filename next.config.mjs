@@ -1,5 +1,16 @@
+import https from "https";
+
 if (process.env.NODE_ENV === "development") {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  const originalRequest = https.request;
+  https.request = function (...args) {
+    for (const arg of args) {
+      if (arg && typeof arg === "object" && !(arg instanceof URL)) {
+        arg.rejectUnauthorized = false;
+      }
+    }
+    return originalRequest.apply(this, args);
+  };
 }
 
 /** @type {import('next').NextConfig} */

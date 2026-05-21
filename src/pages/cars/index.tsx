@@ -142,13 +142,12 @@ export default function CarsList() {
                 <div key={c.slug} className={indexStyles.carCard}>
                   <div className={indexStyles.carImageWrapper}>
                     <Link href={`/cars/${c.slug}`}>
-                      <img
-                        src={getImageUrl(c.thumbnail || c.thumbNail || "") || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=400&q=80"}
-                        alt={c.name}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=400&q=80";
-                        }}
-                      />
+                      {(c.thumbnail || c.thumbNail) && (
+                        <img
+                          src={getImageUrl(c.thumbnail || c.thumbNail || "")}
+                          alt={c.name}
+                        />
+                      )}
                     </Link>
                     <span className={indexStyles.seatsTag}>{c.seatCount} chỗ ngồi</span>
                   </div>

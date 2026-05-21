@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiPhone, FiMail, FiSend } from "react-icons/fi";
 import { toast } from "react-toastify";
-import styles from "./ClientLayout.module.scss";
+import styles from "../ClientLayout/ClientLayout.module.scss";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -100,6 +100,12 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             >
               Xe du lịch
             </Link>
+            <Link
+              href="/hotels"
+              className={`${styles.navLink} ${isActive("/hotels") ? styles.active : ""}`}
+            >
+              Khách sạn
+            </Link>
             <a
               href="/#contact"
               className={`${styles.navLink} ${router.asPath.includes("#contact") ? styles.active : ""}`}
@@ -108,10 +114,6 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               Liên hệ
             </a>
           </nav>
-
-          <Link href="/admin/login" className={styles.adminBtn}>
-            Quản trị VOYAGE
-          </Link>
         </div>
       </header>
 
@@ -143,6 +145,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <li><Link href="/">Trang chủ</Link></li>
               <li><Link href="/tours">Tour du lịch</Link></li>
               <li><Link href="/cars">Đội xe du lịch</Link></li>
+              <li><Link href="/hotels">Khách sạn</Link></li>
               <li><a href="/#contact" onClick={(e) => handleSmoothScroll(e, "contact")}>Liên hệ với chúng tôi</a></li>
             </ul>
           </div>
@@ -153,6 +156,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <li><Link href="/tours">Tours nghỉ dưỡng</Link></li>
               <li><Link href="/tours">Combo tiết kiệm</Link></li>
               <li><Link href="/cars">Thuê xe lữ hành</Link></li>
+              <li><Link href="/hotels">Đặt phòng khách sạn</Link></li>
               <li><a href="/#contact" onClick={(e) => handleSmoothScroll(e, "contact")}>Hỗ trợ 24/7</a></li>
             </ul>
           </div>

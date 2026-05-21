@@ -184,14 +184,13 @@ export default function CarsManagement() {
                   <tr key={c.slug}>
                     <td>
                       <div className={styles.carItemCell}>
-                        <img
-                          src={getImageUrl(c.thumbnail || c.thumbNail || "") || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=120&h=80&q=80"}
-                          alt={c.name}
-                          className={styles.carThumb}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=120&h=80&q=80";
-                          }}
-                        />
+                        {(c.thumbnail || c.thumbNail) && (
+                          <img
+                            src={getImageUrl(c.thumbnail || c.thumbNail || "")}
+                            alt={c.name}
+                            className={styles.carThumb}
+                          />
+                        )}
                         <div className={styles.carMeta}>
                           <span className={styles.carName}>{c.name}</span>
                           <span className={styles.carSpecs}>Ngày tạo: {new Date(c.createdAt).toLocaleDateString("vi-VN")}</span>
@@ -302,14 +301,13 @@ export default function CarsManagement() {
                   <div className={styles.modalSection}>
                     <h4>Hình ảnh xe</h4>
                     <div style={{ width: "100%", height: "240px", borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-                      <img
-                        src={getImageUrl(selectedCar.thumbNail || selectedCar.thumbnail)}
-                        alt={selectedCar.name}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&h=300&q=80";
-                        }}
-                      />
+                      {(selectedCar.thumbNail || selectedCar.thumbnail) && (
+                        <img
+                          src={getImageUrl(selectedCar.thumbNail || selectedCar.thumbnail)}
+                          alt={selectedCar.name}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      )}
                     </div>
                   </div>
 
